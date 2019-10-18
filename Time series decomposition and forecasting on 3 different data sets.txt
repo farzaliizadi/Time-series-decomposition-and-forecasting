@@ -1,0 +1,216 @@
+rm(list=ls())
+birth <- read.csv("births.csv")
+birth <- birth[, -c(1)]
+head(birth)
+str(birth)
+birthts <- ts(birth, frequency=12, start=c(1946,1))
+plot(birthts)
+ap <- log(birthts)
+plot(ap)
+# Decomposition of additive time series
+decomp <- decompose(ap)
+decomp$figure
+plot(decomp$figure,
+     type = 'b',
+     xlab = 'Month',
+     ylab = 'Seasonality Index',
+     col  = 2)
+# Seasonality index in terms of months which is high on July.
+plot(decomp)
+# As we see the top is the ts and the 3 others are
+# trend which is increasing, seasonal and random.
+#Forecasting time series usin Autoregressive integrated
+#moving average model
+set.seed(999)
+library(forecast)
+model <- auto.arima(ap)
+model
+#ARIMA(2,1,2)(1,1,1)[12]
+attributes(model)
+model$var.coef
+model$aic # The smaller, the better
+model$bic # The smaller, the better
+model$arma # The coefficents
+model$residuals # The differnce between actusls and predicted
+# ACF and PACF plots
+acf(model$residuals, main = 'Correlogram') 
+# lags gives in sample error
+#which shows that they values are less than the signifient bounds
+pacf(model$residuals, main = 'Partial Correlogram')
+Box.test(model$residuals, lag =20, type = 'Ljung-Box')
+# Shows p-value =  0.7628 which means that with 95% confidence
+#it is not statistically significant.
+# Residual plot for checking if it is normal or
+#close to normal distribution
+hist(model$residuals,
+     col = 'blue',
+     xlab = 'Error',
+     main = 'Histogram of Residuals',
+     freq = F)
+lines(density(model$residuals), col='red')
+# Forecast for 48 months
+f <- forecast(model, 48)
+# Next 48 months
+library(ggplot2)
+#autoplot is for forecast
+autoplot(f, include.lowest = TRUE, labels = T)
+#Shaded area are 80% and 90% confidence intervals 
+# Two shaded area are conf int in percentages
+accuracy(f)
+#####################################################
+souvenir <- read.csv('souvenirs.csv')
+souvenirs <- souvenir[,-c(1)]
+head(souvenirs)
+str(souvenirs)
+souvenirts <- ts(souvenirs, frequency=12, start=c(1987,1))
+AP <- ts(souvenirs, frequency=12, start=c(1946,1))
+plot(AP)
+ap <- log(AP)
+plot(ap)
+# Decomposition of additive time series
+decomp <- decompose(ap)
+decomp$figure
+plot(decomp$figure,
+     type = 'b',
+     xlab = 'Month',
+     ylab = 'Seasonality Index',
+     col  = 3)
+
+# High on December
+plot(decomp)
+# As we see the top is the ts and the 3 others are
+# trend which is increasing, seasonal and random.
+#Forecasting time series usin Autoregressive integrated
+#moving average model
+set.seed(999)
+library(forecast)
+model <- auto.arima(ap)
+model
+#ARIMA(2,0,0)(0,1,1)[12] with drift 
+attributes(model)
+model$var.coef
+model$aic # The smaller, the better
+model$bic # The smaller, the better
+model$arma # The coefficents
+model$residuals # The differnce between actusls and predicted
+# ACF and PACF plots
+acf(model$residuals, main = 'Correlogram') 
+#lags gives in sample error
+#which shows that they values are less than the signifient bounds
+pacf(model$residuals, main = 'Partial Correlogram')
+Box.test(model$residuals, lag =10, type = 'Ljung-Box')
+# Shows p-value = 0.6382  which means that with 95% confidence
+#it is not statistically significant.
+# Residual plot for checking if it is normal or
+#close to normal distribution
+hist(model$residuals,
+     col = 'blue',
+     xlab = 'Error',
+     main = 'Histogram of Residuals',
+     freq = F)
+# A little far from being normal
+lines(density(model$residuals), col='red')
+# Forecast for 48 months
+f <- forecast(model, 48)
+# Next 48 months
+library(ggplot2)
+#autoplot is for forecast
+autoplot(f, include.lowest = TRUE, labels = T)
+#Shaded area are 80% and 90% confidence intervals 
+# Two shaded area are conf int in percentages
+accuracy(f)
+############################################
+#Read data
+data('AirPassengers')
+AP <- AirPassengers 
+str(AP)
+head(AP)
+# Information about ts
+ts(AP, frequency = 12, start = c(1949, 1))
+attributes(AP)
+# 1949.000 1960.917   12.000 
+# Startin and ending year and 12 months 
+plot(AP)
+# As there is a exponential fluctuation on the series
+# we can remove it by log transformation, 
+# however up and down seasonality will be there.
+# Log transform
+ap <- log(AP)
+# Decomposition of additive time series
+decomp <- decompose(ap)
+decomp$figure
+plot(decomp$figure,
+     type = 'b',
+     xlab = 'Month',
+     ylab = 'Seasonality Index',
+     col  = 2)
+#In the graph xlab= months from 1=Jan...12=Dec.
+# We see the high index from July-August
+# 0 on Apri to May and negative on Novembe_December.
+plot(decomp)
+# As we see the top is the ts and the 3 others are
+# the trend
+#which is increasing, seasonal and random.
+#Forecasting time series usin Autoregressive integrated
+#moving average model
+library(forecast)
+set.seed(7532)
+model <- auto.arima(ap)
+model
+#ARIMA(p,d,q)(1,1,1)[12]
+# p= AR order, d= degree of differencing, and q= MA order.
+#ARIMA(0,1,2)(0,1,1)[12] 
+attributes(model)
+model$var.coef
+model$aic # The smaller, the better
+model$bic # The smaller, the better
+model$arma # The model parameters like p, d, q...
+model$residuals # The differnce between actusls and predicted
+# ACF and PACF plots
+acf(model$residuals, main = 'Correlogram') 
+#lags gives in sample error
+#which shows that they values are less than the signifient bounds
+#except 2 at 1.5 and 2.
+pacf(model$residuals, main = 'Partial Correlogram')
+# All inside the bounds but one at 1.5 <-0.15
+Box.test(model$residuals, lag =20, type = 'Ljung-Box')
+# Shows p-value=  0.7628 which means that with 95% confidence
+#it is not statistically significant.
+# Residual plot for checking if it is normal or
+#close to normal distribution
+hist(model$residuals,
+     col = 'purple',
+     xlab = 'Error',
+     main = 'Histogram of Residuals',
+     freq = F)
+# shows almost normality
+lines(density(model$residuals), col='red')
+# Forecast for 48 months
+f <- forecast(model, 48)
+# Next 48 months
+library(ggplot2)
+#autoplot is for forecast
+autoplot(f, include.lowest = TRUE, labels = T)
+#Shaded area are 80% and 90% confidence intervals 
+# Two shaded area are conf int in percentages
+accuracy(f)
+#Gives accuracy metrics specially root mean squared error.
+##############################################
+# AR model
+#autocorrelation also called serial correlation
+model2 <- ar(AP)
+model2
+attributes(model2)
+model2$frequency
+model2$ar
+model2$order
+model2$aic # The smaller, the better
+# Forecast for 48 months
+g <- forecast(model2, 48)
+# Next 48 months
+library(ggplot2)
+#autoplot is for forecast
+autoplot(g, include.lowest = TRUE, labels = T)
+#Shaded area are 80% and 90% confidence intervals 
+# Two shaded area are conf int in percentages
+accuracy(g)
